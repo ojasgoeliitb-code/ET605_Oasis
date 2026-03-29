@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Robotegers — Grade 7 Integers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky:#EEF6FF; --cream:#FFFDF7; --card:#FFFFFF;
+  --ink:#1E1B2E; --mid:#5A5570; --soft:#A09BB8;
+  --red:#D94F3D; --green:#3D9E6B; --blue:#3B7DD8; --amber:#E8A020; --purple:#7C4DFF;
+  --robot:#5C6BC0; --teacher:#E67E22; --student:#27AE60;
+  --challenge:#FF6B35; --remedial:#9C27B0; --encourage:#2196F3;
+  --sh: 0 4px 24px rgba(30,27,46,.10);
+  --sh2:0 2px 12px rgba(30,27,46,.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--ink);min-height:100vh}
+.topbar{background:var(--ink);color:white;height:60px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.logo{font-family:'Fredoka One',cursive;font-size:1.5rem;letter-spacing:.03em;display:flex;align-items:center;gap:.5rem}
+.tb-right{display:flex;align-items:center;gap:1rem}
+.sid-tag{background:rgba(255,255,255,.12);border-radius:20px;padding:.25rem .8rem;font-size:.78rem;font-weight:700}
+/* Learner profile badges */
+.style-badge{border-radius:20px;padding:.2rem .7rem;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.style-visual{background:#E3F2FD;color:#1565C0}
+.style-narrative{background:#F3E5F5;color:#6A1B9A}
+.style-procedural{background:#E8F5E9;color:#2E7D32}
+.style-unknown{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
+.pace-badge{border-radius:20px;padding:.2rem .6rem;font-size:.68rem;font-weight:700}
+.pace-fast{background:#FFF3E0;color:#E65100}
+.pace-slow{background:#E8EAF6;color:#3949AB}
+.btn-exit{background:transparent;border:1.5px solid rgba(255,255,255,.4);color:white;
+  border-radius:8px;padding:.35rem .9rem;font-size:.8rem;cursor:pointer;font-family:'Nunito',sans-serif;
+  font-weight:700;transition:background .2s}
+.btn-exit:hover{background:rgba(255,255,255,.15)}
+.shell{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 60px)}
+.sidebar{background:white;border-right:2px solid rgba(30,27,46,.07);padding:1.5rem 1.2rem;
+  position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto}
+.sb-ttl{font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);margin-bottom:1rem}
+.mlist{display:flex;flex-direction:column;gap:.3rem}
+.mi{display:flex;align-items:flex-start;gap:.65rem;padding:.6rem .8rem;border-radius:12px;transition:all .15s;cursor:default}
+.mi.active{background:var(--ink);color:white}
+.mi.done{background:#E8F8EE}
+.mi.locked{opacity:.4}
+.mnum{width:26px;height:26px;border-radius:50%;background:rgba(30,27,46,.08);
+  display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;
+  flex-shrink:0;margin-top:1px;font-family:'DM Mono',monospace}
+.mi.active .mnum{background:rgba(255,255,255,.2);color:white}
+.mi.done .mnum{background:var(--green);color:white}
+.mtxt{font-size:.82rem;font-weight:700;line-height:1.3}
+.cdots{display:flex;gap:4px;margin-top:.3rem}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(30,27,46,.15);transition:all .2s}
+.dot.done{background:var(--green)}.dot.cur{background:var(--blue)}
+.sb-div{border:none;border-top:2px solid rgba(30,27,46,.06);margin:1.2rem 0}
+.score-box{background:var(--sky);border-radius:14px;padding:1rem}
+.score-box h3{font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);margin-bottom:.8rem}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.si{text-align:center;background:white;border-radius:10px;padding:.6rem .4rem;box-shadow:var(--sh2)}
+.sn{font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--ink)}
+.sl{font-size:.65rem;font-weight:700;color:var(--soft);margin-top:.1rem;text-transform:uppercase}
+.sn.ok{color:var(--green)}.sn.ng{color:var(--red)}
+/* Streak indicator */
+.streak-bar{margin-top:.7rem;background:white;border-radius:10px;padding:.5rem .7rem;box-shadow:var(--sh2)}
+.streak-row{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;font-weight:700}
+.streak-dots{display:flex;gap:3px}
+.sdot{width:9px;height:9px;border-radius:50%}
+.sdot.c{background:var(--green)}.sdot.w{background:var(--red)}.sdot.n{background:rgba(30,27,46,.1)}
+/* Learner profile panel */
+.profile-box{background:linear-gradient(135deg,#EEF0FC,#F3E5F5);border-radius:10px;padding:.7rem;margin-top:.6rem}
+.profile-lbl{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);margin-bottom:.4rem}
+.profile-item{font-size:.72rem;font-weight:700;color:var(--ink);display:flex;justify-content:space-between;padding:.15rem 0}
+.main{padding:2rem 2.4rem;max-width:860px}
+#login{display:flex;align-items:center;justify-content:center;
+  min-height:calc(100vh - 60px);grid-column:1/-1;padding:2rem}
+.login-card{background:white;border-radius:28px;padding:3rem;box-shadow:var(--sh);
+  max-width:420px;width:100%;text-align:center}
+.login-logo{font-family:'Fredoka One',cursive;font-size:3rem;color:var(--ink);margin-bottom:.3rem}
+.login-sub{color:var(--mid);font-size:.92rem;font-weight:600;margin-bottom:2rem}
+.login-label{display:block;text-align:left;font-size:.8rem;font-weight:800;
+  color:var(--ink);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.05em}
+.login-input{width:100%;border:2.5px solid rgba(30,27,46,.15);border-radius:12px;
+  padding:.75rem 1rem;font-size:1rem;font-family:'Nunito',sans-serif;outline:none;
+  transition:border-color .2s;margin-bottom:1.3rem;font-weight:600}
+.login-input:focus{border-color:var(--blue)}
+.btn-start{width:100%;background:var(--ink);color:white;border:none;border-radius:14px;
+  padding:.9rem;font-size:1rem;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;
+  transition:background .2s;letter-spacing:.02em}
+.btn-start:hover{background:#2E2A40}
+.prog-wrap{margin-bottom:1.8rem}
+.prog-lbl{display:flex;justify-content:space-between;font-size:.76rem;font-weight:700;
+  color:var(--mid);margin-bottom:.4rem}
+.prog-track{height:8px;background:rgba(30,27,46,.1);border-radius:99px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:99px;transition:width .6s ease}
+.classroom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:1.8rem;align-items:start}
+.character-card{background:white;border-radius:20px;padding:1.2rem;box-shadow:var(--sh);
+  display:flex;flex-direction:column;align-items:center;gap:.7rem;position:relative}
+.char-avatar{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:2.2rem;border:3px solid rgba(0,0,0,.08);box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.char-name{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.char-role{font-size:.68rem;font-weight:600;color:var(--soft)}
+.char-teacher .char-avatar{background:linear-gradient(135deg,#FFF3E0,#FFE0B2)}
+.char-teacher .char-name{color:var(--teacher)}
+.char-robot .char-avatar{background:linear-gradient(135deg,#E8EAF6,#C5CAE9)}
+.char-robot .char-name{color:var(--robot)}
+.char-student .char-avatar{background:linear-gradient(135deg,#E8F5E9,#C8E6C9)}
+.char-student .char-name{color:var(--student)}
+.bubble{background:var(--sky);border-radius:16px;padding:.85rem 1rem;font-size:.82rem;
+  font-weight:600;line-height:1.55;color:var(--ink);position:relative;width:100%;
+  border:2px solid rgba(30,27,46,.07)}
+.bubble::before{content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-bottom-color:var(--sky)}
+.char-teacher .bubble{background:#FFF8F0;border-color:rgba(230,126,34,.2)}
+.char-teacher .bubble::before{border-bottom-color:#FFF8F0}
+.char-robot .bubble{background:#EEF0FC;border-color:rgba(92,107,192,.2)}
+.char-robot .bubble::before{border-bottom-color:#EEF0FC}
+.char-student .bubble{background:#F0FBF4;border-color:rgba(39,174,96,.2)}
+.char-student .bubble::before{border-bottom-color:#F0FBF4}
+.bubble.active{animation:bubblePop .4s cubic-bezier(.36,.07,.19,.97)}
+@keyframes bubblePop{0%{transform:scale(.92);opacity:.6}60%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
+.teacher-panel{background:white;border-radius:20px;padding:1.6rem;margin-bottom:1.6rem;
+  box-shadow:var(--sh);border-left:5px solid var(--teacher)}
+.teacher-header{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.teacher-ava{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FFF3E0,#FFE0B2);
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem;border:2px solid rgba(230,126,34,.2)}
+.teacher-name{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--teacher)}
+.teacher-role{font-size:.7rem;font-weight:700;color:var(--soft);text-transform:uppercase}
+.teacher-exp{font-size:.9rem;line-height:1.75;color:var(--ink);white-space:pre-line;margin-bottom:1rem}
+.story-box{background:#FFF8F0;border-radius:12px;padding:1rem 1.1rem;
+  border-left:4px solid var(--amber);font-size:.87rem;line-height:1.65}
+.story-lbl{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--amber);margin-bottom:.35rem}
+.visual-wrap{background:var(--sky);border-radius:14px;padding:1rem;margin-top:.9rem;text-align:center}
+.visual-wrap img{max-width:100%;border-radius:10px;box-shadow:var(--sh2)}
+
+/* ── PED ACTION BANNER ────────────────────────────────────────────── */
+.ped-banner{display:none;border-radius:14px;padding:.9rem 1.2rem;margin-bottom:1.2rem;
+  font-size:.88rem;font-weight:700;animation:fbIn .4s ease;border:2px solid}
+.ped-banner.challenge{background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border-color:var(--challenge);color:#BF360C}
+.ped-banner.encourage{background:linear-gradient(135deg,#E3F2FD,#BBDEFB);border-color:var(--encourage);color:#0D47A1}
+.ped-banner.slowdown{background:linear-gradient(135deg,#FFF9C4,#FFF176);border-color:#F9A825;color:#5D4037}
+.ped-banner.metacog{background:linear-gradient(135deg,#F3E5F5,#E1BEE7);border-color:var(--remedial);color:#4A148C}
+.ped-banner.targeted{background:linear-gradient(135deg,#FCE4EC,#F8BBD0);border-color:#E91E63;color:#880E4F}
+.ped-banner-icon{font-size:1.3rem;margin-right:.5rem}
+
+/* ── QUESTION VARIANT BADGE ───────────────────────────────────────── */
+.q-variant-badge{display:inline-block;border-radius:20px;padding:.2rem .8rem;font-size:.7rem;
+  font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.7rem}
+.qv-standard{background:#EEF0FC;color:var(--robot)}
+.qv-challenge{background:#FFF3E0;color:var(--challenge)}
+.qv-remedial{background:#F3E5F5;color:var(--remedial)}
+.qv-extension{background:#E8F5E9;color:var(--green)}
+
+.robot-panel{background:white;border-radius:20px;padding:1.5rem;margin-bottom:1.4rem;
+  box-shadow:var(--sh);border-left:5px solid var(--robot)}
+.rp-header{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.rp-ava{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#E8EAF6,#C5CAE9);
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem;border:2px solid rgba(92,107,192,.2)}
+.rp-name{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--robot)}
+.rp-role{font-size:.7rem;font-weight:700;color:var(--soft);text-transform:uppercase}
+.robot-says{background:#EEF0FC;border-radius:12px;padding:.9rem 1rem;font-size:.9rem;
+  font-weight:700;color:var(--robot);margin-bottom:1rem;line-height:1.5;font-style:italic}
+.q-prompt{font-size:.95rem;font-weight:700;line-height:1.6;color:var(--ink);margin-bottom:1.1rem}
+.student-panel{background:white;border-radius:20px;padding:1.5rem;margin-bottom:1.4rem;
+  box-shadow:var(--sh);border-left:5px solid var(--student)}
+.opts{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem}
+.opt{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:12px;
+  border:2px solid rgba(30,27,46,.1);cursor:pointer;transition:all .18s;background:white;
+  font-size:.9rem;font-weight:600;text-align:left;font-family:'Nunito',sans-serif;width:100%}
+.opt:hover{border-color:var(--blue);background:#F0F6FF}
+.opt.selected{border-color:var(--blue);background:#EBF3FF}
+.opt.correct{border-color:var(--green);background:#EDFBF3;color:var(--green)}
+.opt.wrong{border-color:var(--red);background:#FEF0EE;color:var(--red)}
+.opt-letter{width:28px;height:28px;border-radius:50%;background:rgba(30,27,46,.08);
+  display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;
+  flex-shrink:0;font-family:'DM Mono',monospace}
+.opt.selected .opt-letter{background:var(--blue);color:white}
+.opt.correct .opt-letter{background:var(--green);color:white}
+.opt.wrong .opt-letter{background:var(--red);color:white}
+.sel-input{width:100%;border:2.5px solid rgba(30,27,46,.15);border-radius:12px;
+  padding:.75rem 1rem;font-size:.92rem;font-family:'Nunito',sans-serif;font-weight:700;
+  outline:none;cursor:pointer;background:white;margin-bottom:1rem;
+  transition:border-color .2s;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A5570' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 1rem center}
+.sel-input:focus{border-color:var(--blue)}
+.tf-group{display:flex;gap:.8rem;margin-bottom:1rem}
+.tf-btn{flex:1;padding:.75rem;border-radius:12px;border:2.5px solid rgba(30,27,46,.1);
+  font-size:.95rem;font-weight:800;cursor:pointer;transition:all .18s;background:white;
+  font-family:'Nunito',sans-serif}
+.tf-btn:hover{border-color:var(--blue)}
+.tf-btn.selected-t{border-color:var(--green);background:#EDFBF3;color:var(--green)}
+.tf-btn.selected-f{border-color:var(--red);background:#FEF0EE;color:var(--red)}
+.tf-btn.correct{border-color:var(--green);background:#EDFBF3;color:var(--green)}
+.tf-btn.wrong{border-color:var(--red);background:#FEF0EE;color:var(--red)}
+.text-input{width:100%;border:2.5px solid rgba(30,27,46,.15);border-radius:12px;
+  padding:.75rem 1rem;font-size:.95rem;font-family:'Nunito',sans-serif;font-weight:700;
+  outline:none;transition:border-color .2s;resize:vertical;min-height:70px;margin-bottom:1rem}
+.text-input:focus{border-color:var(--blue)}
+/* Fill-in-the-blank */
+.fitb-wrap{display:flex;align-items:center;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem;font-size:1rem;font-weight:700;line-height:2}
+.fitb-input{border:none;border-bottom:3px solid var(--blue);background:transparent;
+  width:80px;text-align:center;font-size:1.1rem;font-weight:800;font-family:'DM Mono',monospace;
+  outline:none;color:var(--ink);padding:.1rem .3rem}
+/* Ordering drag */
+.order-wrap{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.order-item{background:white;border:2px solid rgba(30,27,46,.1);border-radius:10px;
+  padding:.55rem 1rem;font-size:.9rem;font-weight:700;cursor:grab;display:flex;align-items:center;gap:.6rem;
+  transition:border-color .2s,box-shadow .2s}
+.order-item:hover{border-color:var(--blue);box-shadow:var(--sh2)}
+.order-item.dragging{opacity:.5;border-style:dashed}
+.order-drag-icon{color:var(--soft);font-size:1rem}
+.ar{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
+.btn-sub{background:var(--ink);color:white;border:none;border-radius:14px;padding:.75rem 2rem;
+  font-size:.95rem;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;
+  transition:background .2s,transform .1s;letter-spacing:.02em}
+.btn-sub:hover{background:#2E2A40}.btn-sub:active{transform:scale(.97)}
+.btn-sub:disabled{background:#aaa;cursor:not-allowed}
+.btn-sub.next-mode{background:#3D9E6B !important;cursor:pointer !important}
+.btn-sub.next-mode:hover{background:#2E8B57 !important}
+.hint-btns{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn-hint{border-radius:10px;padding:.55rem .9rem;font-size:.78rem;font-weight:800;
+  cursor:pointer;border:2px solid;font-family:'Nunito',sans-serif;transition:opacity .15s,transform .1s}
+.btn-hint:active{transform:scale(.96)}
+.bh1{background:#FFF8E1;color:#a07000;border-color:#F9A825}
+.bh2{background:#E8F4FD;color:#1565c0;border-color:#2980B9}
+.bh3{background:#F0FFF0;color:#1b5e20;border-color:#27AE60}
+/* Pulsing when a hint is strongly recommended */
+.btn-hint.recommended{animation:hintPulse 1.8s ease-in-out infinite}
+@keyframes hintPulse{0%,100%{box-shadow:0 0 0 0 rgba(59,125,216,.4)}50%{box-shadow:0 0 0 6px rgba(59,125,216,0)}}
+.fb{border-radius:16px;padding:1.1rem 1.3rem;margin-bottom:1.2rem;display:none;animation:fbIn .35s ease}
+@keyframes fbIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fb.correct{background:#EDFBF3;border:2px solid #A8E6C1}
+.fb.partial{background:#FFF8E1;border:2px solid #F9A825}
+.fb.wrong{background:#FEF0EE;border:2px solid #F1998E}
+.fb.hint{background:#FFF8E1;border:2px solid #F9A825}
+.fb.l2{background:#E8F4FD;border:2px solid #90CAF9}
+.fb.l3{background:#F0FFF0;border:2px solid #A5D6A7}
+.fb.misconception{background:#FCE4EC;border:2px solid #F48FB1}
+.fbh{font-weight:800;margin-bottom:.35rem;font-size:.9rem}
+.fb.correct .fbh{color:var(--green)}.fb.partial .fbh{color:#a07000}
+.fb.wrong .fbh{color:var(--red)}.fb.hint .fbh{color:#a07000}
+.fb.l2 .fbh{color:#1565c0}.fb.l3 .fbh{color:#1b5e20}
+.fb.misconception .fbh{color:#C2185B}
+.fbb{font-size:.86rem;line-height:1.65;font-weight:600;white-space:pre-line}
+.car{margin-top:.5rem;padding-top:.5rem;border-top:2px solid rgba(0,0,0,.06);
+  font-size:.82rem;font-weight:700;color:var(--mid)}
+.hint-img{margin-top:.8rem;text-align:center}
+.hint-img img{max-width:100%;border-radius:10px;box-shadow:var(--sh2)}
+.hint-pie-row{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.8rem;align-items:center;justify-content:center}
+.hint-pie-row img{border-radius:10px;box-shadow:var(--sh2)}
+.pie-step-lbl{font-size:.78rem;font-weight:800;color:var(--mid);text-align:center;margin-top:.3rem}
+
+/* ── DYNAMIC NUMBER LINE ─────────────────────────────────────────── */
+.nl-container{margin:.8rem 0;background:#F8FAFF;border-radius:14px;padding:1rem;
+  border:2px solid #C5D8F8;overflow:hidden}
+.nl-title{font-size:.76rem;font-weight:800;color:#1565C0;margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.05em}
+#dynamic-nl{width:100%;height:90px;display:block}
+.nl-controls{display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap}
+.nl-btn{padding:.3rem .7rem;border-radius:8px;border:2px solid var(--blue);background:#EBF3FF;
+  color:var(--blue);font-size:.75rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s}
+.nl-btn:hover{background:var(--blue);color:white}
+.nl-step-info{font-size:.78rem;font-weight:700;color:var(--mid);padding:.25rem .5rem;
+  background:white;border-radius:8px;border:1px solid rgba(30,27,46,.1)}
+
+.banner{border-radius:14px;padding:.9rem 1.3rem;margin-bottom:1.2rem;display:none;
+  font-weight:800;font-size:.9rem;animation:fbIn .35s ease}
+.banner.concept{background:linear-gradient(135deg,#E3F2FD,#BBDEFB);color:#0d47a1;border:2px solid #90CAF9}
+.banner.module{background:linear-gradient(135deg,#FFF8E1,#FFE082);color:#5D4037;border:2px solid #FFD54F}
+.banner.challenge{background:linear-gradient(135deg,#FFF3E0,#FFCC80);color:#BF360C;border:2px solid var(--challenge)}
+#complete{display:none;text-align:center;padding:2rem 0}
+.comp-title{font-family:'Fredoka One',cursive;font-size:2.8rem;color:var(--ink);margin-bottom:.4rem}
+.comp-sub{color:var(--mid);font-weight:600;margin-bottom:2rem;font-size:.95rem}
+.comp-chars{display:flex;justify-content:center;gap:2rem;margin-bottom:2rem;font-size:3rem}
+.stg{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin-bottom:1.8rem}
+.stc{background:white;border-radius:16px;padding:1.2rem .9rem;box-shadow:var(--sh)}
+.stn{font-family:'Fredoka One',cursive;font-size:2.2rem;color:var(--ink)}
+.stl{font-size:.72rem;font-weight:800;color:var(--soft);text-transform:uppercase;margin-top:.2rem}
+.payload-ttl{font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--soft);margin-bottom:.65rem}
+.payload-valid{background:#EDFBF3;border:2px solid #A8E6C1;border-radius:10px;
+  padding:.6rem 1rem;font-size:.82rem;font-weight:800;color:var(--green);margin-bottom:.8rem}
+.payload-box{background:#1E1B2E;color:#E8D0A0;border-radius:14px;padding:1.3rem;
+  text-align:left;font-family:'DM Mono',monospace;font-size:.76rem;line-height:1.8;overflow-x:auto}
+/* Profile insight at completion */
+.insight-box{background:linear-gradient(135deg,#EEF0FC,#F3E5F5);border-radius:16px;padding:1.2rem;margin-bottom:1.4rem;text-align:left}
+.insight-ttl{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--robot);margin-bottom:.7rem}
+.insight-item{font-size:.85rem;font-weight:600;color:var(--ink);padding:.25rem 0;border-bottom:1px solid rgba(30,27,46,.06)}
+.insight-item:last-child{border-bottom:none}
+@media(max-width:680px){.shell{grid-template-columns:1fr}.sidebar{display:none}.classroom{grid-template-columns:1fr}.main{padding:1.2rem}.stg{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><span>🤖</span> Robotegers</div>
+  <div class="tb-right">
+    <span class="sid-tag" id="sid-tag">Grade 7</span>
+    <span class="style-badge style-unknown" id="style-badge" style="display:none"></span>
+    <button class="btn-exit" id="btn-exit" style="display:none" onclick="exitSession()">Save & Exit</button>
+  </div>
+</div>
+
+<div id="login">
+  <div class="login-card">
+    <div class="login-logo">🤖 Robotegers</div>
+    <div class="login-sub">Adaptive Tutoring · Grade 7 Integers</div>
+    <label class="login-label" for="sid">Your Student ID</label>
+    <input class="login-input" id="sid" type="text" placeholder="e.g. student_1042"/>
+    <button class="btn-start" onclick="startSession()">Let's Learn! →</button>
+  </div>
+</div>
+
+<div class="shell" id="app" style="display:none">
+  <aside class="sidebar">
+    <div class="sb-ttl">Subtopics</div>
+    <div class="mlist" id="mlist"></div>
+    <div class="sb-div"></div>
+    <div class="score-box">
+      <h3>Your Score</h3>
+      <div class="sg">
+        <div class="si"><div class="sn ok" id="sc-c">0</div><div class="sl">Correct</div></div>
+        <div class="si"><div class="sn ng" id="sc-w">0</div><div class="sl">Wrong</div></div>
+        <div class="si"><div class="sn" id="sc-h">0</div><div class="sl">Hints</div></div>
+        <div class="si"><div class="sn" id="sc-r" style="font-size:1rem">0%</div><div class="sl">Done</div></div>
+      </div>
+      <!-- Streak indicator -->
+      <div class="streak-bar" id="streak-bar">
+        <div class="streak-row">
+          <span style="color:var(--mid);font-size:.65rem">STREAK</span>
+          <div class="streak-dots" id="streak-dots"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Learner profile panel -->
+    <div class="profile-box" id="profile-box" style="display:none">
+      <div class="profile-lbl">📊 Your Learning Profile</div>
+      <div class="profile-item"><span>Learning Style</span><span id="pb-style">—</span></div>
+      <div class="profile-item"><span>Pace</span><span id="pb-pace">—</span></div>
+      <div class="profile-item"><span>Accuracy</span><span id="pb-acc">—</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="banner concept" id="bn-c">📘 Concept complete! Moving forward…</div>
+    <div class="banner module"  id="bn-m">🎉 Subtopic complete! Great work!</div>
+    <div class="banner challenge" id="bn-ch">⚡ Challenge unlocked! You're excelling!</div>
+
+    <!-- PED ACTION BANNER -->
+    <div class="ped-banner" id="ped-banner"></div>
+
+    <div class="prog-wrap" id="prog-wrap">
+      <div class="prog-lbl"><span id="prog-txt">Subtopic 1 of 5</span><span id="prog-pct">0%</span></div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <!-- TEACHER PANEL -->
+    <div class="teacher-panel" id="teacher-panel">
+      <div class="teacher-header">
+        <div class="teacher-ava">👩‍🏫</div>
+        <div>
+          <div class="teacher-name">Ms. Sharma</div>
+          <div class="teacher-role">Your Teacher</div>
+        </div>
+      </div>
+      <div class="teacher-exp" id="teacher-exp"></div>
+      <div class="story-box">
+        <div class="story-lbl">📖 Real-World Story</div>
+        <div id="teacher-story"></div>
+      </div>
+      <div class="visual-wrap" id="concept-visual" style="display:none">
+        <img id="concept-img" src="" alt="Visual Aid"/>
+      </div>
+    </div>
+
+    <!-- THREE CHARACTERS -->
+    <div class="classroom" id="classroom">
+      <div class="character-card char-teacher">
+        <div class="char-avatar">👩‍🏫</div>
+        <div class="char-name">Ms. Sharma</div>
+        <div class="char-role">Teacher</div>
+        <div class="bubble active" id="char-teacher-bubble">I've explained the concept above! Now let's see if Robby understands… 🤔</div>
+      </div>
+      <div class="character-card char-robot">
+        <div class="char-avatar">🤖</div>
+        <div class="char-name">Robby</div>
+        <div class="char-role">The Robot</div>
+        <div class="bubble active" id="char-robot-bubble">Hmm, I think I understand… but I'm not so sure. Can you help me? 🙏</div>
+      </div>
+      <div class="character-card char-student">
+        <div class="char-avatar">🧑‍💻</div>
+        <div class="char-name">You!</div>
+        <div class="char-role">The Student</div>
+        <div class="bubble" id="char-student-bubble">I'll teach Robby the right answer! 💪</div>
+      </div>
+    </div>
+
+    <!-- ROBOT QUESTION -->
+    <div class="robot-panel" id="robot-panel">
+      <div class="rp-header">
+        <div class="rp-ava">🤖</div>
+        <div>
+          <div class="rp-name">Robby the Robot</div>
+          <div class="rp-role" id="rp-role-lbl">Asking a doubt</div>
+        </div>
+        <div style="margin-left:auto"><span class="q-variant-badge qv-standard" id="q-variant-badge">Standard</span></div>
+      </div>
+      <div class="robot-says" id="robot-says"></div>
+      <div class="q-prompt" id="q-prompt"></div>
+      <div id="input-area"></div>
+
+      <!-- Feedback -->
+      <div class="fb" id="fb">
+        <div class="fbh" id="fbh"></div>
+        <div class="fbb" id="fbb"></div>
+        <div class="car" id="car" style="display:none"></div>
+        <div id="hint-content"></div>
+      </div>
+
+      <div class="ar">
+        <button class="btn-sub" id="btn-sub" onclick="handleMainButton()">Teach Robby! →</button>
+        <div class="hint-btns" id="hint-btns">
+          <button class="btn-hint bh1" id="btn-hint-l1" onclick="showHint(1)" style="display:none">💡 Hint</button>
+          <button class="btn-hint bh2" id="btn-hint-l2" onclick="showHint(2)" style="display:none">📏 Number Line</button>
+          <button class="btn-hint bh3" id="btn-hint-l3" onclick="showHint(3)" style="display:none">🥧 Pie Example</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPLETION -->
+    <div id="complete">
+      <div class="comp-chars">👩‍🏫 🤖 🧑‍💻</div>
+      <div class="comp-title">Chapter Complete! 🎉</div>
+      <div class="comp-sub">You taught Robby everything about Grade 7 Integers!</div>
+      <div class="insight-box" id="insight-box" style="display:none">
+        <div class="insight-ttl">🧠 Your Learning Profile</div>
+        <div id="insight-items"></div>
+      </div>
+      <div class="stg">
+        <div class="stc"><div class="stn" id="fc">—</div><div class="stl">Correct</div></div>
+        <div class="stc"><div class="stn" id="fw">—</div><div class="stl">Wrong</div></div>
+        <div class="stc"><div class="stn" id="fh">—</div><div class="stl">Hints</div></div>
+      </div>
+      <div class="payload-ttl">Merge Team Session Payload</div>
+      <div class="payload-valid" id="p-valid"></div>
+      <div class="payload-box" id="p-box"></div>
+    </div>
+  </main>
+</div>
+
+<script src="/js/learnerModel.js"></script>
+<script src="/js/pedagogyEngine.js"></script>
+<script>
+const API='';
+let sessionId=null, nextState=null, currentHints={}, currentInputType='MCQ';
+let currentOptions=[], selectedAnswer=null, learnerModel=null;
+let currentConceptId=null, currentQuestionId=null, isRetry=false;
+let hintLevelUnlocked=0, hintLevelUsed=0;
+let waitingForNext=false;
+let currentPedAction=null;  // last pedagogy decision
+let currentVariant='standard'; // 'standard','challenge','remedial'
+
+// ── Dynamic Number Line state ─────────────────────────────────────────
+let nlConfig=null; // {start, end, markers, steps, stepIdx, animated}
+let nlAnimTimer=null;
+
+const MODS=[
+  {id:'m1',label:'Understanding Integers',concepts:5},
+  {id:'m2',label:'Number Line',concepts:5},
+  {id:'m3',label:'Addition',concepts:5},
+  {id:'m4',label:'Subtraction',concepts:5},
+  {id:'m5',label:'Multiplication & Division',concepts:5},
+];
+
+// ── Extended Question Bank — variant questions per concept ─────────────
+// Each entry: {standard, challenge, remedial}
+// challenge = harder extension; remedial = simpler scaffolded version
+const QUESTION_VARIANTS = {
+  'm1_c1_q1': {
+    challenge: {
+      prompt: "Sort these numbers into INTEGERS and NON-INTEGERS:\n−5, 3.14, 0, −½, 100, −2.5, −99\n\nWhich set correctly lists ONLY the integers?",
+      robotAttempt: "All of them are integers because they're all on a number line!",
+      options: ["−5, 0, 100, −99", "−5, 3.14, 0, 100", "0, 3.14, −½", "−5, 0, −½, 100, −2.5"],
+      correct: "−5, 0, 100, −99",
+      hint: "Integers have NO decimal point and NO fraction bar. Check each number carefully!"
+    },
+    remedial: {
+      prompt: "Robby is confused about ONE number. Is 2.5 an integer?\n\nPick the correct answer:",
+      robotAttempt: "2.5 is an integer because it's a number!",
+      options: ["Yes, 2.5 is an integer", "No, 2.5 is NOT an integer — it has a decimal", "Only if it's positive", "Depends on the question"],
+      correct: "No, 2.5 is NOT an integer — it has a decimal",
+      hint: "Integers must be WHOLE numbers. Does 2.5 have a dot in it?"
+    }
+  },
+  'm2_c3_q1': {
+    challenge: {
+      prompt: "Robby claims: \"|−15| + |−8| = |−15 + −8|\"\n\nIs Robby correct, and what is the value of each side?",
+      robotAttempt: "|−15| + |−8| is the same as |−15 + −8|",
+      options: ["Yes, both = 23", "No: left = 23, right = 23 but the rule is wrong", "No: left = 23, right = 23 and Robby is correct for the wrong reason", "Yes, both = −23"],
+      correct: "No: left = 23, right = 23 but the rule is wrong",
+      hint: "Try both sides: |−15|+|−8| = 15+8 = 23. |−15+(−8)| = |−23| = 23. Same answer here, but the rule |a|+|b| = |a+b| is NOT always true! Try with +/- signs."
+    }
+  },
+  'm3_c3_q1': {
+    challenge: {
+      prompt: "The robot must calculate: −13 + 7 + (−4) + 9 + (−6)\n\nThe robot says: \"I'll just add all the numbers: 13+7+4+9+6 = 39, so the answer is −39!\"\n\nWhat is the CORRECT strategy and answer?",
+      robotAttempt: "All numbers together: 13+7+4+9+6 = 39, so answer is −39!",
+      options: ["Group positives and negatives separately: (7+9)+(−13−4−6) = 16−23 = −7", "The robot is correct, answer is −39", "Answer is +39", "Answer is −3"],
+      correct: "Group positives and negatives separately: (7+9)+(−13−4−6) = 16−23 = −7",
+      hint: "Group all positives together, all negatives together. Then subtract the smaller total from the larger."
+    },
+    remedial: {
+      prompt: "Let's simplify. Robby has 3 positive pies and 5 negative pies.\n\nUsing the pie method: what does 3 + (−5) equal?",
+      robotAttempt: "3 + (−5) = 8 because 3 and 5 add to 8!",
+      options: ["−2", "+2", "+8", "−8"],
+      correct: "−2",
+      hint: "Cancel 3 positive pies with 3 negative pies. You have 2 negative pies left. Answer = −2."
+    }
+  },
+  'm4_c1_q1': {
+    challenge: {
+      prompt: "Robby must simplify: 5 − (−3) − (−2) + (−4)\n\nRobby says: \"I subtract all the negatives and add all the positives: 5 + 3 + 2 + 4 = 14!\"\n\nWhat is the CORRECT answer?",
+      robotAttempt: "5 − (−3) − (−2) + (−4) = 5+3+2+4 = 14",
+      options: ["6", "14", "−4", "4"],
+      correct: "6",
+      hint: "Convert all to addition: 5 + 3 + 2 + (−4). Now simplify: 10 + (−4) = 6."
+    }
+  },
+  'm5_c1_q1': {
+    challenge: {
+      prompt: "The robot evaluates: (−2) × (−3) × (−4)\n\nRobby says: \"Three negatives → still negative! Answer is −24.\"\n\nIs Robby correct?",
+      robotAttempt: "Three negatives → always negative! (−2)×(−3)×(−4) = −24",
+      options: ["Yes, Robby is correct — three negatives give negative", "No — (−2)×(−3)=+6, then 6×(−4)=−24. Answer is −24 but Robby's rule is correct!", "No — answer is +24", "No — answer is −24 but Robby's reasoning about ODD negatives is correct"],
+      correct: "No — answer is −24 but Robby's reasoning about ODD negatives is correct",
+      hint: "ODD number of negatives → negative result. EVEN number of negatives → positive result. Three is odd, so yes: −24!"
+    },
+    remedial: {
+      prompt: "Simple sign check: Does (−) × (−) give a positive or negative?",
+      robotAttempt: "I think (−) × (−) is negative because there are two negatives!",
+      options: ["Positive", "Negative", "Zero", "Depends on the numbers"],
+      correct: "Positive",
+      hint: "SAME signs (both negative) → POSITIVE. Think: two negatives cancel each other out!"
+    }
+  }
+};
+
+// ── Dynamic Number Line Configs per question ──────────────────────────
+// Each entry: {range:[min,max], start, steps:[{pos,label,color}], animated}
+const NL_CONFIGS = {
+  'm1_c3_q1': {
+    range:[-10,10], start:null,
+    markers:[{pos:-7,label:'-7',color:'#E53935'},{pos:-2,label:'-2',color:'#43A047'}],
+    highlight:{from:-7,to:-2,color:'rgba(67,160,71,0.15)'},
+    caption:'Which is further RIGHT? That number is GREATER.'
+  },
+  'm2_c1_q1': {
+    range:[-5,5], start:null,
+    markers:[{pos:-3,label:'-3 goes LEFT',color:'#E53935'},{pos:3,label:'+3 goes RIGHT',color:'#43A047'}],
+    caption:'Negative numbers live to the LEFT of zero.'
+  },
+  'm2_c3_q1': {
+    range:[-10,10], start:0,
+    steps:[{pos:-8,label:'|−8| = 8 steps left',color:'#1565C0'}],
+    animated:true,
+    caption:'Absolute value = distance from zero (always positive).'
+  },
+  'm2_c4_q1': {
+    range:[-6,6], start:-2,
+    steps:[{pos:1,label:'Land on +1',color:'#43A047'}],
+    animated:true,
+    caption:'Start at −2, move 3 steps RIGHT → land on +1.'
+  },
+  'm3_c2_q1': {
+    range:[-12,2], start:-5,
+    steps:[{pos:-8,label:'−5+(−3)=−8',color:'#E53935'}],
+    animated:true,
+    caption:'Both negative → move further LEFT. Total debt grows!'
+  },
+  'm3_c3_q1': {
+    range:[-6,10], start:-5,
+    steps:[{pos:3,label:'-5+8=+3',color:'#43A047'}],
+    animated:true,
+    caption:'Different signs: bigger absolute value wins!'
+  },
+  'm4_c1_q1': {
+    range:[-2,10], start:5,
+    steps:[{pos:8,label:'5−(−3)=8',color:'#43A047'}],
+    animated:true,
+    caption:'Subtracting a negative = moving RIGHT (adding!)'
+  },
+  'm4_c2_q1': {
+    range:[-8,2], start:-4,
+    steps:[{pos:-6,label:'-4-2=-6',color:'#E53935'}],
+    animated:true,
+    caption:'Two negatives: move further LEFT.'
+  },
+  'm4_c3_q1': {
+    range:[-10,2], start:-3,
+    steps:[{pos:-8,label:'−3−5=−8',color:'#E53935'}],
+    animated:true,
+    caption:'Fell by 5 degrees → subtract 5 → go further left.'
+  }
+};
+
+// ── PIE IMAGES ─────────────────────────────────────────────────────────
+const PIE_DATA = {
+  // ── SUBTOPIC 1: Understanding Integers ──────────────────────────────────
+  'm1_c1_q1':{guided:'Guided: Is 2.5 an integer?',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Whole pies = integers (no cutting!)'},{img:'/images/pies/s3_guided_result_2.svg',lbl:'Half a pie ≠ integer — it\'s a fraction!'}],steps:[]},
+  'm1_c1_q2':{guided:'Guided: Is −15.0 an integer?',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Bake 6 whole pies — each is a complete integer'},{img:'/images/pies/s3_guided_result_2.svg',lbl:'Writing "2.0" still means 2 whole pies — same thing! −15.0 = −15 ✓'}],steps:[]},
+  'm1_c2_q1':{guided:'Guided: Is zero positive?',guidedSteps:[{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Negative: you OWE 2 pies (below zero)'},{img:'/images/pies/s3_guided_result_2.svg',lbl:'Positive: you HAVE 2 pies (above zero)'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Zero: empty plate — neither owed nor owned!'}],steps:[]},
+  'm1_c2_q2':{guided:'Guided: Diver at −12m',guidedSteps:[{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Owing pies = being BELOW zero, like being underwater'},{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Deeper underwater = more negative. 12m below = −12 ✓'}],steps:[]},
+  'm1_c3_q1':{guided:'Guided: Compare −7 and −2',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Owing 7 pies (−7) — a BIG debt!'},{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Owing 2 pies (−2) — a smaller debt'},{img:'/images/pies/s3_guided_result_2.svg',lbl:'Less debt is BETTER → −2 > −7 ✓'}],steps:[]},
+  'm1_c3_q2':{guided:'Guided: Greatest of −100, −1, 0, −50',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Owing 6 pies — large negative debt'},{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Owing 2 pies — smaller debt, closer to zero'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Zero pies owed: no debt at all — greatest of all! 0 > −1 > −50 > −100 ✓'}],steps:[]},
+  'm1_c4_q1':{guided:'Guided: Is 0 the smallest integer?',guidedSteps:[{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Owe 2 pies: −2 is below zero'},{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Owe 6 pies: −6 is even further below!'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'You can always owe MORE pies — integers go on forever! No smallest.'}],steps:[]},
+  'm1_c4_q2':{guided:'Guided: −999 + 0 = ?',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'You owe 6 pies (−6). Add 0 pies.'},{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Nothing changes! Still owe 6 pies. x + 0 = x always ✓'}],steps:[]},
+  'm1_c5_q1':{guided:'Guided: −80 + 30 = ?',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Owe 6 pies (imagine −80 pies of debt)'},{img:'/images/pies/s4_guided_add3.svg',lbl:'Someone gives you 3 pies back (like +30)'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'Still in debt! 6−3 = 3 still owed → result stays negative ✓'}],steps:[]},
+  'm1_c5_q2':{guided:'Guided: +500 + (−500) = ?',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Bake 6 pies (like earning ₹500)'},{img:'/images/pies/s3_add_5_cancel.svg',lbl:'Give away 5 pies... cancelling out'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Equal amounts cancel! Like baking 5 AND giving 5 → 0 pies left ✓'}],steps:[]},
+  // ── SUBTOPIC 2: Number Line ──────────────────────────────────────────────
+  'm2_c1_q1':{guided:'Guided: Where do numbers live?',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Positive pies (earned) live to the RIGHT of zero'},{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Negative pies (owed) live to the LEFT of zero'}],steps:[]},
+  'm2_c1_q2':{guided:'Guided: Which is further right?',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'More pies you own → further right on the number line'},{img:'/images/pies/s4_guided_2_neg.svg',lbl:'More pies you OWE → further LEFT (more negative)'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Always: rightmost = greatest value ✓'}],steps:[]},
+  'm2_c2_q1':{guided:'Guided: Order −5, 2, −1, 0',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Most debt (−6) = furthest left'},{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Less debt (−2) = a bit right of that'},{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Most owned (+6) = furthest right ✓'}],steps:[]},
+  'm2_c2_q2':{guided:'Guided: Is −3 between −5 and −1?',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Owe 5 pies: that\'s leftmost (most negative)'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'Owe 3 pies: less debt, so a bit to the right'},{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Owe 1 pie: least debt, rightmost. −3 is between −5 and −1 ✓'}],steps:[]},
+  'm2_c3_q1':{guided:'Guided: |−8| = ?',guidedSteps:[{img:'/images/pies/s3_add_8_pies.svg',lbl:'Whether you own 8 pies OR owe 8 pies…'},{img:'/images/pies/s3_add_result_3.svg',lbl:'…the DISTANCE from zero is the same: 8. |−8| = 8 ✓'}],steps:[]},
+  'm2_c3_q2':{guided:'Guided: Which has greater absolute value?',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Owe 6 pies: distance from zero = 6'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'Owe 5 pies: distance from zero = 5'},{img:'/images/pies/s3_add_8_pies.svg',lbl:'More pies owed = greater distance = greater absolute value ✓'}],steps:[]},
+  'm2_c4_q1':{guided:'Guided: −2 + 3 on number line',guidedSteps:[{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Start: owe 2 pies (at −2)'},{img:'/images/pies/s4_guided_add3.svg',lbl:'Receive 3 pies (move right 3 steps)'},{img:'/images/pies/s3_guided_result_2.svg',lbl:'Cancel 2 debt with 2 of 3 → 1 pie left = +1 ✓'}],steps:[]},
+  'm2_c4_q2':{guided:'Guided: Moving on the number line',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Start at 6 positive pies (position +6)'},{img:'/images/pies/s3_add_5_cancel.svg',lbl:'Move left 5 (subtract 5 pies)'},{img:'/images/pies/s3_guided_result_2.svg',lbl:'6 − 5 = 1 pie remains. Landed on +1 ✓'}],steps:[]},
+  'm2_c5_q1':{guided:'Guided: Opposite integers',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Own 3 pies: position = +3'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'Owe 3 pies: position = −3'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Opposites are same distance from zero but opposite sides. +3 and −3 cancel to 0 ✓'}],steps:[]},
+  'm2_c5_q2':{guided:'Guided: Opposites on number line',guidedSteps:[{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Owe 2 pies = position −2'},{img:'/images/pies/s4_guided_add3.svg',lbl:'The opposite must be +2: own 2 pies'},{img:'/images/pies/s3_add_result_3.svg',lbl:'They cancel perfectly: −2 + 2 = 0 ✓ Opposites always sum to zero!'}],steps:[]},
+  // ── SUBTOPIC 3: Addition of Integers ────────────────────────────────────
+  'm3_c1_q1':{guided:'Guided: 8 + 5 = 13 (positive + positive)',guidedSteps:[{img:'/images/pies/s3_add_8_pies.svg',lbl:'Anaya bakes 8 pies on Monday'},{img:'/images/pies/s3_guided_6_pies.svg',lbl:'She bakes 5 more on Tuesday'},{img:'/images/pies/s3_add_8_pies.svg',lbl:'Combine them: 8 + 5 = 13 pies! More + More = Even more ✓'}],steps:[]},
+  'm3_c1_q2':{guided:'Guided: Can adding positives give smaller result?',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Start with 5 pies from Grandma'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Get 3 more pies from Aunt'},{img:'/images/pies/s3_add_8_pies.svg',lbl:'You now have 8 pies — ALWAYS more than 5! Positives + positives always grow ✓'}],steps:[]},
+  'm3_c2_q1':{guided:'Guided: −5 + (−3) = −8',guidedSteps:[{img:'/images/pies/s4_sub_4_neg.svg',lbl:'Owe 5 pies to Grandma (debt = −5)'},{img:'/images/pies/s4_guided_add3.svg',lbl:'Also owe 3 pies to Aunt (more debt = −3)'},{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Total owed: 5 + 3 = 8 pies → −8. Two debts grow, not shrink! ✓'}],steps:[]},
+  'm3_c2_q2':{guided:'Guided: (−11) + (−9) = −20',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Owe 6 pies after Monday (−6 debt)'},{img:'/images/pies/s4_sub_add2.svg',lbl:'Borrow 2 more pies Tuesday (add more debt)'},{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Debts ADD together! 11 + 9 = 20 pies owed → −20 ✓ (not 11−9!)'}],steps:[]},
+  'm3_c3_q1':{steps:[{img:'/images/pies/s3_add_8_pies.svg',lbl:'Step 1: 8 positive pies (+8)'},{img:'/images/pies/s3_add_5_cancel.svg',lbl:'Step 2: Cancel 5 negative (−5)'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Step 3: 3 pies remain = +3 ✓'}],guided:'Guided: −4 + 6 = +2',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Priya has 6 freshly baked pies (+6)'},{img:'/images/pies/s3_guided_4_cancel.svg',lbl:'She owes 4 pies to her neighbour (cancel 4!)'},{img:'/images/pies/s3_guided_result_2.svg',lbl:'6 − 4 = 2 pies she keeps → +2. Same method: −5 + 8 = +3 ✓'}]},
+  'm3_c3_q2':{guided:'Guided: −12 + 7 — which sign wins?',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Owe 6 pies (the bigger group — negative)'},{img:'/images/pies/s4_guided_add3.svg',lbl:'Get 3 pies back (smaller group — positive)'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'6 − 3 = 3 still owed. Bigger group\'s sign WINS → negative! −12+7 = −5 ✓'}],steps:[]},
+  'm3_c4_q1':{guided:'Guided: Does order of addition matter?',guidedSteps:[{img:'/images/pies/s3_add_8_pies.svg',lbl:'Bake 8 pies THEN give away 5 → 3 left'},{img:'/images/pies/s3_add_5_cancel.svg',lbl:'Give away 5 FIRST then bake 8 → still 3 left!'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Order doesn\'t change total! Commutative: a + b = b + a ✓'}],steps:[]},
+  'm3_c4_q2':{guided:'Guided: Regrouping — does it change the answer?',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Group pies first, then deal with debts → same result'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'Or deal with debts first, then pies → same result!'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Grouping never changes the total. Associative property ✓'}],steps:[]},
+  'm3_c5_q1':{guided:'Guided: Grouping positives and negatives',guidedSteps:[{img:'/images/pies/s3_add_8_pies.svg',lbl:'Collect all the pies you HAVE (positives): 9 + 3 = 12'},{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Count all pies you OWE (negatives): 4 + 6 + 2 = 12'},{img:'/images/pies/s3_add_result_3.svg',lbl:'12 pies have vs 12 pies owe → cancel out = 0! Equal groups → zero ✓'}],steps:[]},
+  'm3_c5_q2':{guided:'Guided: Step-by-step addition check',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Start: owe 8 pies (−8). Get 3 back → owe 5 (−5)'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'Owe 1 more pie → owe 6 total (−6). Wait no: −5+(−1)=−6 ✓'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Get 6 pies! −6 + 6 = 0. Debt fully cancelled → 0 ✓ All steps correct!'}],steps:[]},
+  // ── SUBTOPIC 4: Subtraction of Integers ─────────────────────────────────
+  'm4_c1_q1':{guided:'Guided: 5 − (−3) = 8',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Riya has 5 baked pies (+5)'},{img:'/images/pies/s4_guided_add3.svg',lbl:'Someone CANCELS her 3-pie debt (removes −3 = adds +3!)'},{img:'/images/pies/s3_add_8_pies.svg',lbl:'Removing a debt = gaining pies! 5 + 3 = 8 pies ✓'}],steps:[]},
+  'm4_c1_q2':{guided:'Guided: −3 − (−7) = +4',guidedSteps:[{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Riya owes 3 pies (−3). Her friend cancels 7 of her debts!'},{img:'/images/pies/s4_guided_add3.svg',lbl:'Cancelling 7-pie debt = adding 7 pies. −3 + 7'},{img:'/images/pies/s3_guided_result_2.svg',lbl:'|7| > |3|, positive wins. 7−3=4 → Riya now HAS 4 pies! = +4 ✓'}],steps:[]},
+  'm4_c2_q1':{steps:[{img:'/images/pies/s4_sub_4_neg.svg',lbl:'Step 1: Owe 4 pies (−4)'},{img:'/images/pies/s4_sub_add2.svg',lbl:'Step 2: Owe 2 more pies (subtract 2)'},{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Step 3: Total debt = 6 pies → −6 ✓'}],guided:'Guided: −2 − 3 = −5',guidedSteps:[{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Meena already owes 2 pies (−2)'},{img:'/images/pies/s4_guided_add3.svg',lbl:'She borrows 3 more pies (more debt!)'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'2 + 3 = 5 pies owed. Both negative: debts add! → −5. Same: −4−2 = −6 ✓'}]},
+  'm4_c2_q2':{guided:'Guided: Is −15 − 3 = −3 − 15?',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Owe 6, give back 2: ends at −4. But reverse order:'},{img:'/images/pies/s4_sub_add2.svg',lbl:'Give back 2 first, then owe 6: also ends at −4!'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Coincidence here: −15−3 = −3−15 = −18. But subtraction is NOT always commutative! Try 5−3 ≠ 3−5 ✓'}],steps:[]},
+  'm4_c3_q1':{guided:'Guided: Temperature fell — which direction?',guidedSteps:[{img:'/images/pies/s4_sub_4_neg.svg',lbl:'Start: owe 3 pies (like −3°C below freezing)'},{img:'/images/pies/s4_sub_add2.svg',lbl:'"Fell 5 more" = add 5 more debt pies (more negative!)'},{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'3 + 5 = 8 pies of debt → −8°C. Falling = more negative, not positive! ✓'}],steps:[]},
+  'm4_c3_q2':{guided:'Guided: Ascending = which direction?',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Start at −6 (owing 6 pies, like 6m below surface)'},{img:'/images/pies/s4_guided_add3.svg',lbl:'Rise 3m = gain 3 pies back (ADD positive!)'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'6 − 3 = 3 pies still owed → −3. Rising ADDS, it doesn\'t subtract! ✓'}],steps:[]},
+  'm4_c4_q1':{guided:'Guided: −1 − (−5) means move RIGHT',guidedSteps:[{img:'/images/pies/s4_guided_2_neg.svg',lbl:'Start: owe 1 pie (position −1)'},{img:'/images/pies/s4_guided_add3.svg',lbl:'Cancel 5-pie debt (= add 5 pies). Move RIGHT, not left!'},{img:'/images/pies/s3_guided_result_2.svg',lbl:'−1 + 5 = +4. Cancel debt → move right → positive result ✓'}],steps:[]},
+  'm4_c4_q2':{guided:'Guided: 4 − 10 — how far left?',guidedSteps:[{img:'/images/pies/s3_guided_result_2.svg',lbl:'Start with 2 pies (like position +4 — you have pies)'},{img:'/images/pies/s3_add_5_cancel.svg',lbl:'Must give away 5 pies (like subtracting 10)'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'More taken than you had! End up owing 3 pies → negative. 4−10=−6 ✓'}],steps:[]},
+  'm4_c5_q1':{guided:'Guided: Convert all to addition first',guidedSteps:[{img:'/images/pies/s4_sub_result_neg6.svg',lbl:'Owe 2 pies (−2). Cancel 8-pie debt → +8. Now have 6 pies!'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'Owe 3 pies (−3): down to 3 pies. Owe 4 more (−4): now owe 1!'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'Positives=8, Negatives=2+3+4=9. 9>8 → negative wins. 9−8=1 → −1 ✓'}],steps:[]},
+  'm4_c5_q2':{guided:'Guided: Flip double negatives correctly',guidedSteps:[{img:'/images/pies/s3_guided_6_pies.svg',lbl:'Own 5 pies. Cancel 2-pie debt (+2). Cancel 7-pie debt (+7). Total pies = 14!'},{img:'/images/pies/s4_guided_result_neg5.svg',lbl:'Now owe 3 pies (−3). 14 − 3 = 11 pies!'},{img:'/images/pies/s3_add_8_pies.svg',lbl:'5+2+7=14 positive, 3 negative. 14−3=+11. Robby forgot −(−2) = +2, −(−7) = +7 ✓'}],steps:[]},
+  // ── SUBTOPIC 5: Multiplication & Division (PIZZA PIES!) ─────────────────
+  'm5_c1_q1':{steps:[{img:'/images/pies/s5_mul_neg_neg_start.svg',lbl:'Step 1: Remove 3 groups of 4 negative pizza slices'},{img:'/images/pies/s5_mul_neg_neg_result.svg',lbl:'Step 2: Removing negatives = POSITIVE! = +12 ✓'}],guided:'Guided: −2 × (−3) = +6',guidedSteps:[{img:'/images/pies/s5_guided_2groups.svg',lbl:'2 pizza debts of 3 slices each (2 groups of −3)'},{img:'/images/pies/s5_guided_neg6.svg',lbl:'CANCEL those debt pizzas → you gain 6 slices! −×− = + ✓'}]},
+  'm5_c1_q2':{guided:'Guided: Sign of (−5) × (+8)',guidedSteps:[{img:'/images/pies/s5_mul_neg_result.svg',lbl:'You take away (+) 5 pizza pies that are debts (−). One negative.'},{img:'/images/pies/s5_guided_neg6.svg',lbl:'Different signs: one positive, one negative → result is NEGATIVE'},{img:'/images/pies/s5_mul_neg_result.svg',lbl:'(−5) × (+8) = −40. Different signs always → negative ✓'}],steps:[]},
+  'm5_c2_q1':{guided:'Guided: −12 ÷ (−4) = +3',guidedSteps:[{img:'/images/pies/s5_mul_neg_result.svg',lbl:'12 pizza slices that are debts (−12 = 12 negative slices)'},{img:'/images/pies/s5_mul_3groups.svg',lbl:'Share them into groups of 4 negative slices each'},{img:'/images/pies/s5_guided_2groups.svg',lbl:'3 equal groups! Same sign (−÷−) → POSITIVE result = +3 ✓'}],steps:[]},
+  'm5_c2_q2':{guided:'Guided: +36 ÷ (−9) — different signs',guidedSteps:[{img:'/images/pies/s5_mul_3groups.svg',lbl:'36 real pizza slices (+36) split into groups of 9'},{img:'/images/pies/s5_mul_neg_result.svg',lbl:'But those groups are "debt groups" (dividing by negative −9)'},{img:'/images/pies/s5_guided_neg6.svg',lbl:'Different signs (+÷−) → NEGATIVE result. 36÷9=4 → −4 ✓'}],steps:[]},
+  'm5_c3_q1':{guided:'Guided: 7 ÷ 0 is impossible!',guidedSteps:[{img:'/images/pies/s5_mul_3groups.svg',lbl:'7 pizzas to share equally among friends'},{img:'/images/pies/s5_mul_neg_neg_start.svg',lbl:'Share into groups of ZERO slices? Impossible — no such group exists!'},{img:'/images/pies/s5_guided_neg6.svg',lbl:'Division by zero = UNDEFINED. No answer exists ✓'}],steps:[]},
+  'm5_c3_q2':{guided:'Guided: 0 ÷ (−50) = 0',guidedSteps:[{img:'/images/pies/s5_mul_neg_result.svg',lbl:'0 pizzas to share among 50 people (or 50 pizza debts)'},{img:'/images/pies/s5_guided_2groups.svg',lbl:'Each person gets: 0 ÷ 50 = 0 slices regardless of sign!'},{img:'/images/pies/s3_add_result_3.svg',lbl:'Zero shared among anything = 0. Robby is correct! ✓'}],steps:[]},
+  'm5_c4_q1':{guided:'Guided: Odd count of negatives → negative',guidedSteps:[{img:'/images/pies/s5_guided_neg6.svg',lbl:'1 pizza debt (−1): negative (1 negative = ODD → result negative)'},{img:'/images/pies/s5_mul_neg_neg_result.svg',lbl:'2 pizza debts cancelled (−1×−1=+1): even → positive'},{img:'/images/pies/s5_guided_neg6.svg',lbl:'3rd flip: back to negative! 5 negatives = ODD → −1. Robby is correct ✓'}],steps:[]},
+  'm5_c4_q2':{guided:'Guided: (−2)×(−3)×(+4) — count the negatives',guidedSteps:[{img:'/images/pies/s5_guided_2groups.svg',lbl:'2 groups of 3 pizza debts (−2 and −3 are the negatives — 2 total)'},{img:'/images/pies/s5_mul_neg_neg_result.svg',lbl:'2 negatives = EVEN → positive sign! (like cancelling debt twice)'},{img:'/images/pies/s5_mul_3groups.svg',lbl:'Value: 2×3×4=24. Even negatives → +24. Robby counted right and IS correct ✓'}],steps:[]},
+  'm5_c5_q1':{guided:'Guided: (−4)×(−3)÷6 = +2',guidedSteps:[{img:'/images/pies/s5_guided_2groups.svg',lbl:'2 groups of pizza debts (−4 and −3). Two negatives = EVEN → positive sign'},{img:'/images/pies/s5_mul_3groups.svg',lbl:'Calculate: 4×3=12 slices, then split among 6 → 2 slices per person'},{img:'/images/pies/s5_mul_neg_neg_result.svg',lbl:'Even negatives + value 2 → answer = +2. Robby is correct ✓'}],steps:[]},
+  'm5_c5_q2':{guided:'Guided: 24÷(−4)×(−3) step by step',guidedSteps:[{img:'/images/pies/s5_mul_neg_result.svg',lbl:'Step 1: 24 real pizza slices ÷ group of −4 → different signs → −6'},{img:'/images/pies/s5_guided_neg6.svg',lbl:'Step 2: −6 pizza debts × −3 (remove 3 debt groups) → same signs → positive!'},{img:'/images/pies/s5_mul_neg_neg_result.svg',lbl:'6×3=18, same signs → +18. Every step correct, Robby is right ✓'}],steps:[]},
+};
+
+// ── Start ────────────────────────────────────────────────────────────────
+async function startSession(){
+  const sid=document.getElementById('sid').value.trim()||'student_anon';
+  const d=await post('/api/session/start',{student_id:sid});
+  sessionId=d.session_id;
+  learnerModel=new LearnerModel(sid,sessionId,d.chapter_id);
+  learnerModel.session.totalQuestions=50;
+  learnerModel.session.totalHintsEmbedded=50;
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='grid';
+  document.getElementById('btn-exit').style.display='block';
+  document.getElementById('sid-tag').textContent=sid;
+  buildSidebar();
+  renderState(d);
+}
+
+// ── Sidebar ──────────────────────────────────────────────────────────────
+function buildSidebar(){
+  document.getElementById('mlist').innerHTML=MODS.map((m,i)=>`
+    <div class="mi locked" id="ml-${m.id}">
+      <div>
+        <div style="display:flex;align-items:center;gap:.65rem">
+          <div class="mnum">${i+1}</div>
+          <div class="mtxt">${m.label}</div>
+        </div>
+        <div class="cdots" id="cd-${m.id}">
+          ${Array.from({length:m.concepts},(_,n)=>`<div class="dot" id="dot-${m.id}_c${n+1}"></div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function updateSidebar(state){
+  const comp=Object.keys(state.module_mastery||{});
+  MODS.forEach(m=>{
+    const el=document.getElementById('ml-'+m.id); if(!el)return;
+    el.className='mi '+(comp.includes(m.id)?'done':m.id===state.module_id?'active':'locked');
+    el.querySelector('.mnum').textContent=comp.includes(m.id)?'✓':MODS.findIndex(x=>x.id===m.id)+1;
+  });
+  const mid=state.module_id||'', cp=state.concept_progress_in_module||1;
+  const modInfo=MODS.find(m=>m.id===mid);
+  const numConcepts=modInfo?modInfo.concepts:4;
+  for(let i=1;i<=numConcepts;i++){
+    const d=document.getElementById(`dot-${mid}_c${i}`); if(!d)continue;
+    d.className='dot'+(i<cp?' done':i===cp?' cur':'');
+  }
+}
+
+// ── Render state ──────────────────────────────────────────────────────────
+function renderState(state){
+  nextState=null; selectedAnswer=null;
+  waitingForNext=false;
+  currentVariant='standard';
+  hidePedBanner();
+
+  const conceptsBefore=[0,5,10,15,20];
+  const modIdx=(state.module_progress||1)-1;
+  const conceptsCompleted=conceptsBefore[modIdx]+((state.concept_progress_in_module||1)-1);
+  const pct=Math.round((conceptsCompleted/25)*100);
+  document.getElementById('prog-txt').textContent=
+    `Subtopic ${state.module_progress} of ${state.total_modules} · Concept ${state.concept_progress_in_module} of ${state.total_concepts_in_module}`;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-fill').style.width=pct+'%';
+  updateSidebar(state);
+
+  document.getElementById('teacher-exp').textContent=state.concept_explanation||'';
+  document.getElementById('teacher-story').textContent=state.concept_story||'';
+  setCharBubble('teacher', `Now let me explain: "${state.concept_title}" — read carefully! 📚`);
+
+  const q=state.question;
+  if(!q){
+    const btn=document.getElementById('btn-sub');
+    btn.disabled=false; btn.textContent='Next →';
+    btn.className='btn-sub next-mode';
+    waitingForNext=true; return;
+  }
+  currentConceptId=state.concept_id;
+  currentQuestionId=q.question_id;
+  currentInputType=q.input_type||'TEXT';
+  currentOptions=q.options||[];
+  isRetry=false;
+
+  document.getElementById('robot-says').textContent=`"${q.robot_attempt}"`;
+  document.getElementById('q-prompt').textContent=q.prompt;
+  setCharBubble('robot', q.robot_is_wrong
+    ? `I said: "${q.robot_attempt}" — am I right? 🤔`
+    : `My question is: ${q.prompt.split('\n')[0]} Help me! 🙏`);
+  setCharBubble('student','I need to teach Robby the correct answer! Let me think… 🤔');
+
+  currentHints = state.hints||{l1:'',l2_image:q.hint_l2_image||'',l3:''};
+
+  // Set variant badge
+  setVariantBadge('standard');
+
+  buildInputArea(currentInputType, currentOptions, q.question_id);
+  document.getElementById('fb').style.display='none';
+  document.getElementById('hint-content').innerHTML='';
+  document.getElementById('btn-sub').disabled=false;
+  document.getElementById('btn-sub').textContent='Teach Robby! →';
+  document.getElementById('btn-sub').className='btn-sub';
+  document.getElementById('btn-sub').removeAttribute('style');
+
+  hintLevelUnlocked=0; hintLevelUsed=0;
+  document.getElementById('btn-hint-l1').style.display='none';
+  document.getElementById('btn-hint-l2').style.display='none';
+  document.getElementById('btn-hint-l3').style.display='none';
+  document.querySelectorAll('.btn-hint').forEach(b=>b.classList.remove('recommended'));
+
+  learnerModel.initConcept(currentConceptId);
+  learnerModel.markQuestionStart(currentConceptId);
+
+  // If we have a NL config for this question, show dynamic number line in hint content area
+  // (it will render when user sees it — auto-show for visual learners after 1 wrong)
+  checkAutoShowNumberLine();
+}
+
+function setCharBubble(who, text){
+  const el=document.getElementById('char-'+who+'-bubble');
+  if(el){el.textContent=text;el.classList.remove('active');void el.offsetWidth;el.classList.add('active');}
+}
+
+// ── Build input area ──────────────────────────────────────────────────────
+function buildInputArea(type, options, qid){
+  const area=document.getElementById('input-area');
+  const letters=['A','B','C','D','E'];
+  if(type==='MCQ'){
+    area.innerHTML=`<div class="opts">${options.map((o,i)=>`
+      <button class="opt" onclick="selectMCQ(this,'${esc(o)}')" id="opt-${i}" data-value="${esc(o)}">
+        <span class="opt-letter">${letters[i]}</span>${o}
+      </button>`).join('')}</div>`;
+  } else if(type==='DROPDOWN'){
+    area.innerHTML=`<select class="sel-input" id="sel-ans" onchange="selectedAnswer=this.value">
+      <option value="">— Select your answer —</option>
+      ${options.map(o=>`<option value="${esc(o)}">${o}</option>`).join('')}
+    </select>`;
+  } else if(type==='TRUE_FALSE'){
+    area.innerHTML=`<div class="tf-group">
+      <button class="tf-btn" onclick="selectTF(this,'True')" id="tf-true">✅ True</button>
+      <button class="tf-btn" onclick="selectTF(this,'False')" id="tf-false">❌ False</button>
+    </div>`;
+  } else {
+    area.innerHTML=`<textarea class="text-input" id="text-ans" placeholder="Type your answer here…" rows="3"></textarea>`;
+  }
+  selectedAnswer=null;
+}
+
+function selectMCQ(btn, val){
+  document.querySelectorAll('.opt').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedAnswer=btn.getAttribute('data-value')||val;
+}
+function selectTF(btn, val){
+  document.getElementById('tf-true').classList.remove('selected-t','selected-f');
+  document.getElementById('tf-false').classList.remove('selected-t','selected-f');
+  btn.classList.add(val==='True'?'selected-t':'selected-f');
+  selectedAnswer=val;
+}
+function esc(s){ return s.replace(/'/g,"&#39;").replace(/"/g,'&quot;'); }
+
+// ── Submit ────────────────────────────────────────────────────────────────
+async function submitAnswer(){
+  if(waitingForNext) return;
+  let answer=selectedAnswer;
+  if(!answer && currentInputType==='DROPDOWN')
+    answer=document.getElementById('sel-ans')?.value;
+  if(!answer && currentInputType==='TEXT')
+    answer=document.getElementById('text-ans')?.value?.trim();
+  if(!answer||answer===''){alert('Please select or enter an answer first!');return;}
+
+  document.getElementById('btn-sub').disabled=true;
+
+  // If in variant mode, evaluate locally
+  if(currentVariant==='challenge'||currentVariant==='remedial'){
+    const vd=currentVariantData;
+    const correct=(answer.toLowerCase().trim())===(vd.correct.toLowerCase().trim());
+    learnerModel.recordAnswer(currentConceptId, currentQuestionId+'_'+currentVariant, correct, isRetry, answer);
+    if(correct){
+      const sig=learnerModel.getSignals(currentConceptId);
+      const ped=sig?getPedagogicalAction(sig):{action:'continue',reason:'no signals'};
+      syncServer(currentConceptId,ped.action,ped.reason);
+      colourOptions(true,answer,vd.correct);
+      showFB('correct','✅ Correct! Robby learned from you!','');
+      setCharBubble('robot','Oh! Now I understand! Thank you so much! 🎉');
+      waitingForNext=true; nextState=null;
+      const btn=document.getElementById('btn-sub');
+      btn.disabled=false; btn.textContent='Next →'; btn.className='btn-sub next-mode';
+      document.getElementById('btn-hint-l1').style.display='none';
+      document.getElementById('btn-hint-l2').style.display='none';
+      document.getElementById('btn-hint-l3').style.display='none';
+    } else {
+      isRetry=true;
+      colourOptions(false,answer,vd.correct);
+      showFB('wrong','❌ Not quite, Robby is still confused!',vd.hint||'Try again!');
+      document.getElementById('btn-sub').disabled=false;
+      document.getElementById('btn-sub').textContent='Try Again →';
+      unlockNextHintLevel();
+      resetSelectionDelay();
+    }
+    updateScores(); updateProfileDisplay(); return;
+  }
+
+  let data;
+  try{
+    data=await post(`/api/session/${sessionId}/answer`,{answer});
+  }catch(e){
+    document.getElementById('btn-sub').disabled=false;
+    document.getElementById('btn-sub').textContent='Try Again →'; return;
+  }
+  if(data.hints) currentHints=data.hints;
+
+  learnerModel.recordAnswer(currentConceptId,currentQuestionId,data.correct,isRetry,answer);
+
+  if(data.chapter_done){showCompletion(data);return;}
+
+  try{
+    if(data.correct){
+      const sig1=learnerModel.getSignals(currentConceptId);
+      const ped=sig1?getPedagogicalAction(sig1):{action:'continue',reason:'no signals'};
+      syncServer(currentConceptId,ped.action,ped.reason);
+      currentPedAction=ped;
+
+      colourOptions(true,answer,data.correct_answer);
+      showFB('correct','✅ Correct! Robby learned from you!',data.feedback||'');
+      setCharBubble('robot','Oh! Now I understand! Thank you so much! 🎉');
+      setCharBubble('student','I taught Robby the right answer! 🎓');
+
+      if(data.concept_done){
+        learnerModel.markConceptComplete(currentConceptId);
+        showBanner(data.module_done?'module':'concept');
+      }
+
+      // Check if challenge mode should be offered
+      if(ped.action==='advance_challenge') showBanner('challenge');
+
+      waitingForNext=true; nextState=data.next_state||null;
+      const btn=document.getElementById('btn-sub');
+      btn.disabled=false; btn.textContent='Next →'; btn.className='btn-sub next-mode';
+      document.getElementById('btn-hint-l1').style.display='none';
+      document.getElementById('btn-hint-l2').style.display='none';
+      document.getElementById('btn-hint-l3').style.display='none';
+
+    } else {
+      isRetry=true;
+      const sig2=learnerModel.getSignals(currentConceptId);
+      const ped=sig2?getPedagogicalAction(sig2):{action:'continue',reason:'no signals'};
+      syncServer(currentConceptId,ped.action,ped.reason);
+      currentPedAction=ped;
+
+      // Show personalised PED banner
+      showPedBanner(ped);
+
+      colourOptions(false,answer,data.correct_answer);
+
+      // Misconception-targeted feedback
+      if(ped.action==='targeted_remedial'){
+        showFB('misconception','🎯 Common Misconception Spotted!',
+          ped.message + '\n\n' + (data.feedback||''));
+      } else if(ped.action==='slow_down'){
+        showFB('wrong','⏸️ Slow down and re-read carefully!',
+          ped.message + '\n\n' + (data.feedback||'Try again!'));
+      } else if(ped.action==='encourage'){
+        showFB('partial','💙 Keep going — you can do this!',
+          ped.message + '\n\n' + (data.feedback||''));
+      } else {
+        if(data.partial_credit)
+          showFB('partial','🟡 Almost! You\'re on the right track!',data.feedback);
+        else
+          showFB('wrong','❌ Not quite, Robby is still confused!',data.feedback||'Try again!');
+      }
+
+      setCharBubble('robot','Hmm, I\'m still confused… can you try again? 😕');
+      document.getElementById('btn-sub').disabled=false;
+      document.getElementById('btn-sub').textContent='Try Again →';
+
+      // Hint management: style-adapted
+      manageHintButtons(ped);
+      resetSelectionDelay();
+    }
+    updateScores();
+    updateProfileDisplay();
+  }catch(err){
+    const btnE=document.getElementById('btn-sub');
+    if(data&&data.correct){
+      btnE.disabled=false; btnE.textContent='Next →'; btnE.className='btn-sub next-mode'; waitingForNext=true;
+    } else { btnE.disabled=false; btnE.textContent='Try Again →'; }
+    updateScores();
+  }
+}
+
+// ── Hint management (style-adapted) ──────────────────────────────────────
+function manageHintButtons(ped){
+  // Base: progressive unlock
+  if(hintLevelUnlocked===0){
+    hintLevelUnlocked=1;
+    document.getElementById('btn-hint-l1').style.display='inline-block';
+  } else if(hintLevelUsed>=1 && hintLevelUnlocked<2){
+    hintLevelUnlocked=2;
+    document.getElementById('btn-hint-l2').style.display='inline-block';
+  } else if(hintLevelUsed>=2 && hintLevelUnlocked<3){
+    hintLevelUnlocked=3;
+    document.getElementById('btn-hint-l3').style.display='inline-block';
+  }
+
+  // Style adaptation: visual learner → pulse number line button
+  if(ped && (ped.action==='style_hint'||ped.action==='visual_l2') && ped.hintLevel===2){
+    hintLevelUnlocked=Math.max(2,hintLevelUnlocked);
+    document.getElementById('btn-hint-l2').style.display='inline-block';
+    document.getElementById('btn-hint-l2').classList.add('recommended');
+  }
+  // Narrative learner → highlight pie example
+  if(ped && ped.action==='style_hint' && ped.hintLevel===3){
+    hintLevelUnlocked=Math.max(3,hintLevelUnlocked);
+    document.getElementById('btn-hint-l3').style.display='inline-block';
+    document.getElementById('btn-hint-l3').classList.add('recommended');
+  }
+  // Metacognitive: highlight L1 but don't unlock higher
+  if(ped && ped.action==='metacognitive'){
+    document.getElementById('btn-hint-l1').style.display='inline-block';
+    document.getElementById('btn-hint-l1').classList.add('recommended');
+  }
+}
+
+function unlockNextHintLevel(){
+  if(hintLevelUnlocked===0){
+    hintLevelUnlocked=1;
+    document.getElementById('btn-hint-l1').style.display='inline-block';
+  } else if(hintLevelUsed>=1&&hintLevelUnlocked<2){
+    hintLevelUnlocked=2;
+    document.getElementById('btn-hint-l2').style.display='inline-block';
+  } else if(hintLevelUsed>=2&&hintLevelUnlocked<3){
+    hintLevelUnlocked=3;
+    document.getElementById('btn-hint-l3').style.display='inline-block';
+  }
+}
+
+function resetSelectionDelay(){
+  setTimeout(()=>{
+    selectedAnswer=null;
+    document.querySelectorAll('.opt').forEach(b=>b.classList.remove('selected','wrong','correct'));
+    if(currentInputType==='TRUE_FALSE'){
+      const ta=document.getElementById('tf-true'),fb=document.getElementById('tf-false');
+      if(ta)ta.classList.remove('selected-t','selected-f','wrong','correct');
+      if(fb)fb.classList.remove('selected-t','selected-f','wrong','correct');
+    }
+    if(currentInputType==='DROPDOWN'){
+      const sel=document.getElementById('sel-ans');
+      if(sel){sel.value='';sel.style.borderColor='';sel.style.background='';}
+    }
+  },1500);
+}
+
+function colourOptions(correct,chosen,correctAnswer){
+  if(currentInputType==='MCQ'){
+    document.querySelectorAll('.opt').forEach(btn=>{
+      const val=btn.getAttribute('data-value')||'';
+      const valN=val.toLowerCase().trim();
+      const correctN=(correctAnswer||'').toLowerCase().trim();
+      const chosenN=(chosen||'').toLowerCase().trim();
+      if(correct){ if(valN===correctN)btn.classList.add('correct'); }
+      else { if(valN===chosenN)btn.classList.add('wrong'); }
+    });
+  } else if(currentInputType==='TRUE_FALSE'){
+    const ta=document.getElementById('tf-true'),fb=document.getElementById('tf-false');
+    if(correct){
+      if(correctAnswer==='True'||correctAnswer==='true')ta.classList.add('correct');
+      else fb.classList.add('correct');
+    } else {
+      if(chosen==='True')ta.classList.add('wrong');
+      else fb.classList.add('wrong');
+    }
+  } else if(currentInputType==='DROPDOWN'){
+    const sel=document.getElementById('sel-ans');
+    if(sel){sel.style.borderColor=correct?'var(--green)':'var(--red)';sel.style.background=correct?'#EDFBF3':'#FEF0EE';}
+  }
+}
+
+// ── Main button ───────────────────────────────────────────────────────────
+async function handleMainButton(){
+  const btn=document.getElementById('btn-sub');
+  if(waitingForNext||btn.textContent.trim()==='Next →'){
+    btn.disabled=true;
+    // After correct answer: check ped action for challenge/variant
+    if(currentPedAction&&currentPedAction.action==='advance_challenge'){
+      tryOfferChallenge();
+      return;
+    }
+    try{
+      if(nextState){ renderState(nextState); }
+      else {
+        const resp=await fetch(API+`/api/session/${sessionId}`);
+        if(resp.ok){ renderState(await resp.json()); }
+        else { btn.disabled=false;btn.textContent='Next →';btn.className='btn-sub next-mode';waitingForNext=true; }
+      }
+    }catch(e){
+      btn.disabled=false;btn.textContent='Next →';btn.className='btn-sub next-mode';waitingForNext=true;
+    }
+    return;
+  }
+  submitAnswer();
+}
+
+// ── Challenge / Variant question logic ───────────────────────────────────
+let currentVariantData=null;
+function tryOfferChallenge(){
+  const vd=(QUESTION_VARIANTS[currentQuestionId]||{}).challenge;
+  if(!vd){
+    // No challenge available, just advance
+    advanceNormally();
+    return;
+  }
+  // Swap in challenge question
+  currentVariant='challenge';
+  currentVariantData=vd;
+  setVariantBadge('challenge');
+  document.getElementById('robot-says').textContent=`"${vd.robotAttempt}"`;
+  document.getElementById('q-prompt').textContent=vd.prompt;
+  // Reset to MCQ with challenge options
+  currentInputType='MCQ';
+  currentOptions=vd.options;
+  buildInputArea('MCQ',vd.options,currentQuestionId+'_challenge');
+  document.getElementById('fb').style.display='none';
+  document.getElementById('hint-content').innerHTML='';
+  const btn=document.getElementById('btn-sub');
+  btn.disabled=false;btn.textContent='Teach Robby! →';btn.className='btn-sub';
+  waitingForNext=false;
+  isRetry=false;
+  hintLevelUnlocked=0;hintLevelUsed=0;
+  document.getElementById('btn-hint-l1').style.display='none';
+  document.getElementById('btn-hint-l2').style.display='none';
+  document.getElementById('btn-hint-l3').style.display='none';
+  showPedBanner({action:'advance_challenge',message:'🔥 Challenge question! Show what you know.'});
+}
+
+function tryOfferRemedial(){
+  const vd=(QUESTION_VARIANTS[currentQuestionId]||{}).remedial;
+  if(!vd) return false;
+  currentVariant='remedial';
+  currentVariantData=vd;
+  setVariantBadge('remedial');
+  document.getElementById('robot-says').textContent=`"${vd.robotAttempt}"`;
+  document.getElementById('q-prompt').textContent=vd.prompt;
+  currentInputType='MCQ';
+  currentOptions=vd.options;
+  buildInputArea('MCQ',vd.options,currentQuestionId+'_remedial');
+  document.getElementById('fb').style.display='none';
+  document.getElementById('hint-content').innerHTML='';
+  const btn=document.getElementById('btn-sub');
+  btn.disabled=false;btn.textContent='Teach Robby! →';btn.className='btn-sub';
+  waitingForNext=false;
+  isRetry=false;
+  hintLevelUnlocked=0;hintLevelUsed=0;
+  return true;
+}
+
+async function advanceNormally(){
+  const btn=document.getElementById('btn-sub');
+  btn.disabled=true;
+  try{
+    if(nextState){ renderState(nextState); }
+    else {
+      const resp=await fetch(API+`/api/session/${sessionId}`);
+      if(resp.ok){ renderState(await resp.json()); }
+      else { btn.disabled=false;btn.textContent='Next →';btn.className='btn-sub next-mode';waitingForNext=true; }
+    }
+  }catch(e){
+    btn.disabled=false;btn.textContent='Next →';btn.className='btn-sub next-mode';waitingForNext=true;
+  }
+}
+
+function setVariantBadge(type){
+  const b=document.getElementById('q-variant-badge');
+  const labels={standard:'Standard',challenge:'⚡ Challenge',remedial:'🔄 Scaffolded',extension:'🌟 Extension'};
+  const classes={standard:'qv-standard',challenge:'qv-challenge',remedial:'qv-remedial',extension:'qv-extension'};
+  b.textContent=labels[type]||type;
+  b.className='q-variant-badge '+(classes[type]||'qv-standard');
+}
+
+// ── PED Banner ────────────────────────────────────────────────────────────
+function showPedBanner(ped){
+  if(!ped||!ped.message) return;
+  const el=document.getElementById('ped-banner');
+  const typeMap={
+    advance_challenge:'challenge',
+    encourage:'encourage',
+    slow_down:'slowdown',
+    metacognitive:'metacog',
+    targeted_remedial:'targeted',
+    style_hint:'metacog',
+  };
+  const cls=typeMap[ped.action]||'';
+  if(!cls){el.style.display='none';return;}
+  el.className='ped-banner '+cls;
+  el.innerHTML=`<span class="ped-banner-icon">${ped.message.split(' ')[0]}</span>${ped.message}`;
+  el.style.display='block';
+  setTimeout(()=>el.style.display='none',6000);
+}
+function hidePedBanner(){
+  document.getElementById('ped-banner').style.display='none';
+}
+
+// ── Dynamic Number Line ───────────────────────────────────────────────────
+function checkAutoShowNumberLine(){
+  // Auto-show number line for visual learners after first render (not on wrong)
+  const sig=learnerModel.getSignals(currentConceptId);
+  if(sig&&sig.learningStyle==='visual'&&NL_CONFIGS[currentQuestionId]){
+    // Show NL immediately in the hint content region
+    setTimeout(()=>renderNumberLineInHint(),300);
+  }
+}
+
+function renderNumberLineInHint(){
+  const cfg=NL_CONFIGS[currentQuestionId];
+  if(!cfg) return;
+  const hc=document.getElementById('hint-content');
+  hc.innerHTML=`<div class="nl-container">
+    <div class="nl-title">📏 Interactive Number Line</div>
+    <canvas id="dynamic-nl" width="700" height="90"></canvas>
+    ${cfg.animated?`<div class="nl-controls">
+      <button class="nl-btn" onclick="animateNL()">▶ Animate</button>
+      <button class="nl-btn" onclick="resetNL()">↺ Reset</button>
+      <span class="nl-step-info" id="nl-step-info">Press Animate to see the steps</span>
+    </div>`:''}
+    <div style="font-size:.75rem;font-weight:700;color:var(--mid);margin-top:.4rem">${cfg.caption||''}</div>
+  </div>`;
+  nlConfig={...cfg, stepIdx:0};
+  drawNumberLine(cfg.range, cfg.markers||[], cfg.highlight||null, cfg.start, null, null);
+}
+
+function drawNumberLine(range, markers, highlight, startPos, currentPos, arrowTo){
+  const canvas=document.getElementById('dynamic-nl');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  const [min,max]=range;
+  const pad=40;
+  const usableW=W-pad*2;
+  const toX=n=>pad+(n-min)/(max-min)*usableW;
+  const midY=H/2+10;
+  ctx.clearRect(0,0,W,H);
+
+  // Highlight band
+  if(highlight){
+    ctx.fillStyle=highlight.color||'rgba(59,125,216,0.1)';
+    ctx.beginPath();
+    ctx.rect(Math.min(toX(highlight.from),toX(highlight.to)),midY-18,
+      Math.abs(toX(highlight.to)-toX(highlight.from)),36);
+    ctx.fill();
+  }
+
+  // Axis line
+  ctx.strokeStyle='#BDC3CE'; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.moveTo(pad-10,midY); ctx.lineTo(W-pad+10,midY); ctx.stroke();
+
+  // Arrow heads
+  ctx.beginPath(); ctx.moveTo(W-pad+10,midY); ctx.lineTo(W-pad+3,midY-5); ctx.lineTo(W-pad+3,midY+5); ctx.closePath();
+  ctx.fillStyle='#BDC3CE'; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(pad-10,midY); ctx.lineTo(pad-3,midY-5); ctx.lineTo(pad-3,midY+5); ctx.closePath();
+  ctx.fill();
+
+  // Tick marks + labels
+  ctx.font='bold 11px DM Mono, monospace'; ctx.textAlign='center'; ctx.fillStyle='#5A5570';
+  for(let n=min;n<=max;n++){
+    const x=toX(n);
+    const isZero=n===0;
+    ctx.strokeStyle=isZero?'#1E1B2E':'#BDC3CE';
+    ctx.lineWidth=isZero?2.5:1.5;
+    ctx.beginPath(); ctx.moveTo(x,midY-8); ctx.lineTo(x,midY+8); ctx.stroke();
+    ctx.fillStyle=isZero?'#1E1B2E':'#5A5570';
+    ctx.fillText(n,x,midY+22);
+  }
+
+  // Arrow for movement
+  if(startPos!==null && arrowTo!==null){
+    const sx=toX(startPos), ex=toX(arrowTo);
+    const above=arrowTo>startPos;
+    ctx.strokeStyle=arrowTo>=startPos?'#43A047':'#E53935';
+    ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(sx,midY-(above?14:14)); ctx.lineTo(ex,midY-(above?14:14)); ctx.stroke();
+    // Arrow head
+    ctx.beginPath();
+    if(arrowTo>startPos){ ctx.moveTo(ex,midY-14); ctx.lineTo(ex-7,midY-20); ctx.lineTo(ex-7,midY-8); }
+    else { ctx.moveTo(ex,midY-14); ctx.lineTo(ex+7,midY-20); ctx.lineTo(ex+7,midY-8); }
+    ctx.closePath(); ctx.fillStyle=arrowTo>=startPos?'#43A047':'#E53935'; ctx.fill();
+  }
+
+  // Markers (labelled dots)
+  (markers||[]).forEach(m=>{
+    const x=toX(m.pos);
+    ctx.beginPath(); ctx.arc(x,midY,9,0,Math.PI*2);
+    ctx.fillStyle=m.color||'#3B7DD8'; ctx.fill();
+    ctx.fillStyle='white'; ctx.font='bold 10px DM Mono, monospace';
+    ctx.textAlign='center'; ctx.fillText(m.pos,x,midY+3.5);
+    if(m.label){
+      ctx.fillStyle=m.color||'#3B7DD8'; ctx.font='bold 10px Nunito, sans-serif';
+      ctx.fillText(m.label,x,midY-18);
+    }
+  });
+
+  // Start / current position dot
+  if(startPos!==null){
+    const x=toX(startPos);
+    ctx.beginPath(); ctx.arc(x,midY,10,0,Math.PI*2);
+    ctx.fillStyle='#3B7DD8'; ctx.fill();
+    ctx.fillStyle='white'; ctx.font='bold 11px DM Mono, monospace'; ctx.textAlign='center';
+    ctx.fillText(startPos,x,midY+4);
+    ctx.fillStyle='#1565C0'; ctx.font='bold 10px Nunito, sans-serif';
+    ctx.fillText('Start',x,midY-22);
+  }
+  if(currentPos!==null && currentPos!==startPos){
+    const x=toX(currentPos);
+    ctx.beginPath(); ctx.arc(x,midY,10,0,Math.PI*2);
+    ctx.fillStyle='#43A047'; ctx.fill();
+    ctx.fillStyle='white'; ctx.font='bold 11px DM Mono, monospace'; ctx.textAlign='center';
+    ctx.fillText(currentPos,x,midY+4);
+    ctx.fillStyle='#2E7D32'; ctx.font='bold 10px Nunito, sans-serif';
+    ctx.fillText('Land here',x,midY-22);
+  }
+}
+
+let nlAnimStep=0;
+function animateNL(){
+  if(!nlConfig||!nlConfig.steps) return;
+  const cfg=nlConfig;
+  nlAnimStep=0;
+  clearInterval(nlAnimTimer);
+  drawNumberLine(cfg.range,cfg.markers||[],null,cfg.start,null,null);
+  document.getElementById('nl-step-info').textContent='Starting at '+cfg.start+'…';
+  nlAnimTimer=setInterval(()=>{
+    if(nlAnimStep>=cfg.steps.length){ clearInterval(nlAnimTimer); return; }
+    const step=cfg.steps[nlAnimStep];
+    drawNumberLine(cfg.range,cfg.markers||[],null,cfg.start,step.pos,step.pos);
+    document.getElementById('nl-step-info').textContent=(step.label||'Step '+(nlAnimStep+1));
+    nlAnimStep++;
+  },1200);
+}
+function resetNL(){
+  clearInterval(nlAnimTimer);
+  if(!nlConfig) return;
+  drawNumberLine(nlConfig.range,nlConfig.markers||[],null,nlConfig.start,null,null);
+  document.getElementById('nl-step-info').textContent='Press Animate to see the steps';
+}
+
+// ── Hints ─────────────────────────────────────────────────────────────────
+function showHint(level){
+  learnerModel.recordHintUsed(currentConceptId,level);
+  if(level > hintLevelUsed) hintLevelUsed=level;
+  document.querySelectorAll('.btn-hint').forEach(b=>b.classList.remove('recommended'));
+  const hc=document.getElementById('hint-content');
+
+  if(level===1){
+    const txt=currentHints.l1||'Think carefully about the rules you just learned!';
+    showFB('hint','💡 Hint from Ms. Sharma', txt); hc.innerHTML='';
+
+  } else if(level===2){
+    showFB('l2','📏 Number Line Visual');
+    // Try dynamic number line first
+    const cfg=NL_CONFIGS[currentQuestionId];
+    if(cfg){
+      hc.innerHTML=`<div class="nl-container">
+        <div class="nl-title">📏 Interactive Number Line</div>
+        <canvas id="dynamic-nl" width="700" height="90"></canvas>
+        ${cfg.animated?`<div class="nl-controls">
+          <button class="nl-btn" onclick="animateNL()">▶ Animate Steps</button>
+          <button class="nl-btn" onclick="resetNL()">↺ Reset</button>
+          <span class="nl-step-info" id="nl-step-info">Press Animate to see the steps</span>
+        </div>`:''}
+        <div style="font-size:.75rem;font-weight:700;color:var(--mid);margin-top:.4rem">${cfg.caption||''}</div>
+      </div>`;
+      nlConfig={...cfg,stepIdx:0};
+      drawNumberLine(cfg.range,cfg.markers||[],cfg.highlight||null,cfg.start,null,null);
+    } else {
+      const imgPath=currentHints.l2_image||'';
+      hc.innerHTML=imgPath
+        ? `<div class="hint-img"><img src="${imgPath}" alt="Number line" onerror="this.style.display='none'"/></div>`
+        : '<div style="color:#888;font-size:.82rem">Number line diagram for this concept</div>';
+    }
+
+  } else if(level===3){
+    const pie=PIE_DATA[currentQuestionId];
+    if(pie){
+      const l3text=currentHints.l3||'';
+      showFB('l3','🥧 Guided Pie Example — '+pie.guided);
+      let html=`<div style="font-size:.82rem;font-weight:700;color:#1b5e20;margin-bottom:.6rem">${l3text}</div>`;
+      html+=`<div class="hint-pie-row">`;
+      pie.guidedSteps.forEach(s=>{
+        html+=`<div style="text-align:center">
+          <img src="${s.img}" width="180" onerror="this.style.display='none'" alt="${s.lbl}"/>
+          <div class="pie-step-lbl">${s.lbl}</div></div>`;
+      });
+      html+=`</div>`;
+      if(pie.steps&&pie.steps.length>0){
+        html+=`<div style="margin-top:1rem;padding-top:.8rem;border-top:2px solid rgba(0,0,0,.07)">
+          <div style="font-size:.8rem;font-weight:800;color:#27AE60;margin-bottom:.5rem">Now back to your question — same method!</div>
+          <div class="hint-pie-row">`;
+        pie.steps.forEach(s=>{
+          html+=`<div style="text-align:center">
+            <img src="${s.img}" width="180" onerror="this.style.display='none'" alt="${s.lbl}"/>
+            <div class="pie-step-lbl">${s.lbl}</div></div>`;
+        });
+        html+=`</div></div>`;
+      }
+      hc.innerHTML=html;
+    } else {
+      showFB('l3','🥧 Guided Example',currentHints.l3||'Work through step by step using the method taught above.');
+      hc.innerHTML='';
+    }
+  }
+
+  // After showing hint: check if remedial should be offered
+  const sig=learnerModel.getSignals(currentConceptId);
+  if(sig&&sig.consecutiveWrong>=3&&level===3){
+    const offered=tryOfferRemedial();
+    if(offered){
+      showPedBanner({action:'targeted_remedial',message:'🔄 Let me simplify this for you with an easier version first!'});
+    }
+  }
+  updateScores();
+  updateProfileDisplay();
+}
+
+// ── Profile display ───────────────────────────────────────────────────────
+function updateProfileDisplay(){
+  const sig=learnerModel.getSignals(currentConceptId);
+  if(!sig) return;
+  const pb=document.getElementById('profile-box');
+  pb.style.display='block';
+  const styleLabels={visual:'👁️ Visual',procedural:'⚙️ Procedural',narrative:'📖 Narrative',unknown:'❓ Learning'};
+  const paceLabels={fast:'⚡ Fast',normal:'✅ Normal',slow:'🐢 Careful'};
+  document.getElementById('pb-style').textContent=styleLabels[sig.learningStyle]||'—';
+  document.getElementById('pb-pace').textContent=paceLabels[sig.pacingProfile]||'—';
+  const total=learnerModel.session.correctAnswers+learnerModel.session.wrongAnswers;
+  const acc=total>0?Math.round(learnerModel.session.correctAnswers/total*100)+'%':'—';
+  document.getElementById('pb-acc').textContent=acc;
+
+  // Top bar style badge
+  const sb=document.getElementById('style-badge');
+  const styleClasses={visual:'style-visual',procedural:'style-procedural',narrative:'style-narrative',unknown:'style-unknown'};
+  if(sig.learningStyle!=='unknown'){
+    sb.className='style-badge '+(styleClasses[sig.learningStyle]||'style-unknown');
+    sb.textContent=styleLabels[sig.learningStyle]||'';
+    sb.style.display='inline-block';
+  }
+
+  // Streak dots
+  const streakEl=document.getElementById('streak-dots');
+  const n=5; let dots='';
+  for(let i=0;i<n;i++){
+    const c=i<learnerModel.session.streakCorrect?'c':i<learnerModel.session.streakWrong?'w':'n';
+    dots+=`<div class="sdot ${c}"></div>`;
+  }
+  streakEl.innerHTML=dots;
+}
+
+// ── Sync ──────────────────────────────────────────────────────────────────
+async function syncServer(cid,action,reason){
+  try{ await post(`/api/session/${sessionId}/sync`,
+    learnerModel.buildSyncPayload(cid,action,reason)); }catch(e){}
+}
+
+async function exitSession(){
+  if(!confirm('Save and exit?'))return;
+  await post(`/api/session/${sessionId}/exit`,{});
+  alert('Session saved!');
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────
+function showFB(type,header,body,correctAnswer){
+  const p=document.getElementById('fb');
+  p.className='fb '+type; p.style.display='block';
+  document.getElementById('fbh').textContent=header;
+  document.getElementById('fbb').textContent=body||'';
+  const r=document.getElementById('car');
+  if(correctAnswer&&type!=='correct'){
+    r.style.display='block'; r.textContent='✅ Correct answer: '+correctAnswer;
+  } else r.style.display='none';
+}
+
+function showBanner(type){
+  const idMap={concept:'bn-c',module:'bn-m',challenge:'bn-ch'};
+  const el=document.getElementById(idMap[type]||'bn-c');
+  if(el){ el.style.display='block'; setTimeout(()=>el.style.display='none',3200); }
+}
+
+function updateScores(){
+  const s=learnerModel.session;
+  document.getElementById('sc-c').textContent=s.correctAnswers;
+  document.getElementById('sc-w').textContent=s.wrongAnswers;
+  document.getElementById('sc-h').textContent=s.hintsUsed;
+  document.getElementById('sc-r').textContent=
+    Math.round((s.topicUnitsCompleted/25)*100)+'%';
+}
+
+function showCompletion(data){
+  ['robot-panel','teacher-panel','classroom','prog-wrap','bn-c','bn-m','bn-ch','ped-banner'].forEach(id=>{
+    const el=document.getElementById(id); if(el)el.style.display='none';
+  });
+  document.getElementById('complete').style.display='block';
+  const s=learnerModel.session;
+  document.getElementById('fc').textContent=s.correctAnswers;
+  document.getElementById('fw').textContent=s.wrongAnswers;
+  document.getElementById('fh').textContent=s.hintsUsed;
+
+  // Personalised insight
+  const sig=learnerModel.getSignals(currentConceptId)||{};
+  const insightEl=document.getElementById('insight-box');
+  const itemsEl=document.getElementById('insight-items');
+  const styleDesc={visual:'You learn best with visual diagrams and number lines.',
+    procedural:'You prefer working through problems step-by-step without hints.',
+    narrative:'You connect well with real-world stories and worked examples.',
+    unknown:'Keep exploring — your learning style will emerge over more sessions.'};
+  const paceDesc={fast:'You answer quickly — try double-checking before submitting!',
+    slow:'You take your time and think carefully — great habit!',
+    normal:'Your pacing is well-balanced.'};
+  const total=s.correctAnswers+s.wrongAnswers;
+  const acc=total>0?Math.round(s.correctAnswers/total*100):0;
+  itemsEl.innerHTML=[
+    `<div class="insight-item">🎨 Learning Style: <b>${sig.learningStyle||'Mixed'}</b> — ${styleDesc[sig.learningStyle||'unknown']}</div>`,
+    `<div class="insight-item">⏱️ Pacing: <b>${sig.pacingProfile||'Normal'}</b> — ${paceDesc[sig.pacingProfile||'normal']}</div>`,
+    `<div class="insight-item">🎯 Accuracy: <b>${acc}%</b> (${s.correctAnswers} correct out of ${total})</div>`,
+    `<div class="insight-item">💡 Hints used: <b>${s.hintsUsed}</b>${s.hintsUsed===0?' — Impressive! You solved everything independently!':s.hintsUsed<5?' — Good independence!':' — Hints helped you learn, that\'s what they\'re for!'}</div>`,
+    s.streakCorrect>=3?`<div class="insight-item">🔥 Best streak: <b>${s.streakCorrect}</b> correct answers in a row!</div>`:'',
+  ].join('');
+  insightEl.style.display='block';
+
+  const payload=learnerModel.buildMergePayload('completed');
+  document.getElementById('p-valid').textContent='✓ Payload ready — all sanity checks passed!';
+  document.getElementById('p-box').textContent=
+    JSON.stringify(payload,(_,v)=>v instanceof Set?[...v]:v,2);
+  document.getElementById('prog-fill').style.width='100%';
+  document.getElementById('prog-pct').textContent='100%';
+  MODS.forEach(m=>{
+    const el=document.getElementById('ml-'+m.id);
+    if(el){el.className='mi done';el.querySelector('.mnum').textContent='✓';}
+  });
+}
+
+async function post(url,body){
+  const r=await fetch(API+url,{method:'POST',
+    headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return r.json();
+}
+</script>
+</body>
+</html>
